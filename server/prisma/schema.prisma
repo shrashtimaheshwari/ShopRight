@@ -1,0 +1,236 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  SHOPKEEPER
+  DELIVERY_PARTNER
+  ADMIN
+}
+
+enum ShopStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PLACED
+  ACCEPTED
+  PREPARING
+  READY
+  PICKED_UP
+  DELIVERED
+  CANCELLED
+  REJECTED
+}
+
+enum PaymentMethod {
+  COD
+  RAZORPAY_TEST
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  phone        String
+  passwordHash String
+  role         Role
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  addresses          Address[]
+  shops              Shop[]                  @relation("ShopOwner")
+  customerOrders     Order[]                 @relation("CustomerOrders")
+  assignedDeliveries Order[]                 @relation("AssignedDeliveries")
+  deliveryProfile    DeliveryPartnerProfile?
+  ratings            Rating[]                @relation("CustomerRatings")
+  refreshTokens      RefreshToken[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  line1     String
+  city      String
+  lat       Float
+  lng       Float
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[] @relation("DeliveryAddress")
+
+  @@index([userId])
+}
+
+model Shop {
+  id              String     @id @default(uuid())
+  ownerId         String
+  owner           User       @relation("ShopOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  name            String
+  description     String     @db.Text
+  category        String
+  lat             Float
+  lng             Float
+  address         String
+  status          ShopStatus @default(PENDING)
+  serviceRadiusKm Float      @default(5.0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  products Product[]
+  orders   Order[]
+  ratings  Rating[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name        String
+  description String   @db.Text
+  price       Int      // Price in paise (e.g. 29900 = ₹299.00)
+  unit        String
+  imageUrl    String
+  inStock     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([shopId])
+  @@index([inStock])
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  customerId        String
+  customer          User        @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Restrict)
+  shopId            String
+  shop              Shop        @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  deliveryPartnerId String?
+  deliveryPartner   User?       @relation("AssignedDeliveries", fields: [deliveryPartnerId], references: [id], onDelete: SetNull)
+  deliveryAddressId String
+  deliveryAddress   Address     @relation("DeliveryAddress", fields: [deliveryAddressId], references: [id], onDelete: Restrict)
+  status            OrderStatus @default(PLACED)
+  subtotal          Int         // Server-computed subtotal in paise
+  deliveryFee       Int         // Server-computed delivery fee in paise
+  total             Int         // Server-computed total in paise
+  idempotencyKey    String?     @unique
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  items   OrderItem[]
+  payment Payment?
+  rating  Rating?
+
+  @@index([customerId])
+  @@index([shopId])
+  @@index([deliveryPartnerId])
+  @@index([status])
+}
+
+model OrderItem {
+  id               String   @id @default(uuid())
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity         Int
+  unitPriceAtOrder Int      // Snapshot price in paise at time of order
+  createdAt        DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model DeliveryPartnerProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentLat  Float?
+  currentLng  Float?
+  isAvailable Boolean  @default(false)
+  vehicleType String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isAvailable])
+}
+
+model Rating {
+  id         String   @id @default(uuid())
+  orderId    String   @unique
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   User     @relation("CustomerRatings", fields: [customerId], references: [id], onDelete: Restrict)
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  stars      Int
+  comment    String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([shopId])
+  @@index([customerId])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  orderId     String        @unique
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method      PaymentMethod
+  status      PaymentStatus @default(PENDING)
+  providerRef String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([orderId])
+}
+
+model DeliveryFeeRule {
+  id                    String   @id @default(uuid())
+  baseFee               Int      // In paise
+  perKmFee              Int      // In paise
+  freeDeliveryThreshold Int?     // In paise, nullable
+  effectiveFrom         DateTime @default(now())
+  createdAt             DateTime @default(now())
+
+  @@index([effectiveFrom])
+}

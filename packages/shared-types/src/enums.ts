@@ -1,0 +1,36 @@
+export enum Role {
+  CUSTOMER = 'CUSTOMER',
+  SHOPKEEPER = 'SHOPKEEPER',
+  DELIVERY_PARTNER = 'DELIVERY_PARTNER',
+  ADMIN = 'ADMIN',
+}
+
+export enum ShopStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export enum OrderStatus {
+  PLACED = 'PLACED',
+  ACCEPTED = 'ACCEPTED',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  PICKED_UP = 'PICKED_UP',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
+}
+
+export enum PaymentMethod {
+  COD = 'COD',
+  RAZORPAY_TEST = 'RAZORPAY_TEST',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}
