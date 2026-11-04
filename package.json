@@ -9,6 +9,9 @@
     "server"
   ],
   "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -n \"API,CUSTOMER,MERCHANT,DELIVERY,ADMIN\" -c \"green,cyan,yellow,blue,magenta\" \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\"",
+    "dev:all": "concurrently -k -p \"[{name}]\" -n \"API,CUSTOMER,MERCHANT,DELIVERY,ADMIN\" -c \"green,cyan,yellow,blue,magenta\" \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\"",
+    "dev:frontends": "concurrently -k -p \"[{name}]\" -n \"CUSTOMER,MERCHANT,DELIVERY,ADMIN\" -c \"cyan,yellow,blue,magenta\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\"",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
@@ -35,5 +38,8 @@
     "vite"
   ],
   "author": "ShopRight Team",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
 }
