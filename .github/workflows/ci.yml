@@ -30,14 +30,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20.x
+      - name: Setup Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build shared packages
+        run: npm run build --workspace=packages/shared-types
 
       - name: Generate Prisma client
         run: npx --workspace=server prisma generate
@@ -63,6 +66,9 @@ jobs:
           JWT_ACCESS_SECRET: test_jwt_access_secret_12345
           JWT_REFRESH_SECRET: test_jwt_refresh_secret_67890
           PORT: 3001
+          YOUPI_API_URL: http://localhost:6100
+          YOUPI_API_KEY: dev_youpi_api_key
+          YOUPI_WEBHOOK_SECRET: dev_youpi_webhook_secret_32chars_min
 
       - name: Build all workspaces
         run: npm run build
