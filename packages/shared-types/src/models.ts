@@ -72,6 +72,7 @@ export interface OrderDto {
   items?: OrderItemDto[];
   shop?: ShopDto;
   deliveryAddress?: AddressDto;
+  payment?: PaymentDto | null;
   rating?: RatingDto | null;
 }
 
@@ -100,6 +101,8 @@ export interface PaymentDto {
   method: PaymentMethod;
   status: PaymentStatus;
   providerRef?: string | null;
+  checkoutUrl?: string | null;
+  expiresAt?: string | null;
 }
 
 export interface DeliveryFeeRuleDto {

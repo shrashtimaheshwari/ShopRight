@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AddressDto, OrderDto } from '@shopright/shared-types';
-import { ShoppingBag, MapPin, Plus, ShieldCheck, AlertCircle, RefreshCw, Trash2, ArrowRight } from 'lucide-react';
+import { AddressDto, OrderDto, PaymentMethod } from '@shopright/shared-types';
+import { ShoppingBag, MapPin, Plus, ShieldCheck, AlertCircle, RefreshCw, Trash2, ArrowRight, QrCode, Banknote } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../api/client';
@@ -14,6 +14,7 @@ export function CheckoutPage() {
 
   const [addresses, setAddresses] = useState<AddressDto[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.UPI_QR);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,6 +101,18 @@ export function CheckoutPage() {
         method: 'POST',
         body: JSON.stringify(payload),
       });
+
+      // If customer chose UPI QR, initiate payment session via YouPI-PG
+      if (paymentMethod === PaymentMethod.UPI_QR) {
+        try {
+          await apiRequest(`/orders/${order.id}/pay`, {
+            method: 'POST',
+            body: JSON.stringify({ method: PaymentMethod.UPI_QR }),
+          });
+        } catch (payErr) {
+          console.warn('Failed to pre-initiate YouPI payment session:', payErr);
+        }
+      }
 
       clearCart();
       navigate(`/orders/${order.id}/track`);
@@ -356,6 +369,51 @@ export function CheckoutPage() {
               </div>
             </div>
 
+            {/* Payment Method Selector */}
+            <div className="space-y-2 pt-2 border-t border-slate-800">
+              <label className="text-xs font-bold text-white block">Payment Method</label>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod(PaymentMethod.UPI_QR)}
+                  className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                    paymentMethod === PaymentMethod.UPI_QR
+                      ? 'border-emerald-500 bg-emerald-500/10 text-white'
+                      : 'border-slate-800 bg-slate-900/40 text-slate-400 hover:bg-slate-900'
+                  }`}
+                >
+                  <QrCode className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span>UPI Instant (YouPI-PG Dynamic QR)</span>
+                      <span className="text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded-full">0% Fee</span>
+                    </div>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 leading-snug">
+                      Instant verification via bank observer mesh. Google Pay, PhonePe, Paytm, or BHIM.
+                    </span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod(PaymentMethod.COD)}
+                  className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                    paymentMethod === PaymentMethod.COD
+                      ? 'border-emerald-500 bg-emerald-500/10 text-white'
+                      : 'border-slate-800 bg-slate-900/40 text-slate-400 hover:bg-slate-900'
+                  }`}
+                >
+                  <Banknote className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs font-bold text-white">Cash on Delivery (COD)</div>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 leading-snug">
+                      Pay cash directly to the delivery partner upon arrival.
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px] text-slate-400 leading-relaxed">
               <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                 <ShieldCheck className="w-3.5 h-3.5" />
@@ -382,7 +440,7 @@ export function CheckoutPage() {
                 </>
               ) : (
                 <>
-                  Place Order (Cash on Delivery)
+                  {paymentMethod === PaymentMethod.UPI_QR ? 'Place Order & Pay via UPI' : 'Place Order (Cash on Delivery)'}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

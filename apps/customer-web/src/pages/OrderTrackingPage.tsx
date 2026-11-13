@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { OrderDto, OrderStatus } from '@shopright/shared-types';
-import { CheckCircle2, Clock, Package, Bike, Home, AlertCircle, RefreshCw, XCircle, Star } from 'lucide-react';
+import { CheckCircle2, Clock, Package, Bike, Home, AlertCircle, RefreshCw, XCircle, Star, QrCode, ExternalLink, ShieldCheck } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
 const ORDER_STAGES: { status: OrderStatus; label: string; icon: React.ElementType }[] = [
@@ -258,6 +258,57 @@ export function OrderTrackingPage() {
             <span className="font-mono">₹{(order.total / 100).toFixed(2)}</span>
           </div>
         </div>
+      </div>
+
+      {/* Payment Details & YouPI-PG Gateway Status */}
+      <div className="p-6 rounded-2xl glass-panel space-y-4 border border-slate-800">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            Payment Status
+          </h3>
+          <span
+            className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
+              order.payment?.status === 'COMPLETED'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                : order.payment?.status === 'FAILED'
+                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+            }`}
+          >
+            {order.payment?.status || 'PENDING'}
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+          <div>
+            <span className="text-slate-500 block text-[11px]">Method</span>
+            <span className="font-semibold text-white">
+              {order.payment?.method === 'UPI_QR' ? 'UPI Instant (YouPI-PG Dynamic QR)' : 'Cash on Delivery (COD)'}
+            </span>
+          </div>
+          {order.payment?.providerRef && (
+            <div>
+              <span className="text-slate-500 block text-[11px]">Reference / Session</span>
+              <span className="font-mono text-slate-300">{order.payment.providerRef}</span>
+            </div>
+          )}
+        </div>
+
+        {order.payment?.method === 'UPI_QR' && order.payment?.status !== 'COMPLETED' && order.payment?.checkoutUrl && (
+          <div className="pt-2">
+            <a
+              href={order.payment.checkoutUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20"
+            >
+              <QrCode className="w-4 h-4" />
+              Open UPI QR Checkout Portal
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Cancellation Guard (Security Doc §4) */}
