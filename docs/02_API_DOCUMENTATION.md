@@ -1,6 +1,6 @@
 # ShopRight — API Documentation
 
-Base URL (dev): `http://localhost:4000/api/v1`
+Base URL (dev): `http://localhost:3001/api/v1`
 
 This is the contract all four frontends build against. Update this file whenever a route changes — it should never drift from the actual implementation.
 

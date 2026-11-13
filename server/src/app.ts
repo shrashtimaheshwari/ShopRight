@@ -11,6 +11,7 @@ import { ordersRouter, addressesRouter } from './modules/orders/index.js';
 import { merchantRouter } from './modules/shops/merchantRouter.js';
 import { deliveryRouter } from './modules/delivery/index.js';
 import { adminRouter } from './modules/admin/index.js';
+import { paymentsRouter } from './modules/payments/paymentsRouter.js';
 import { ApiErrorCode } from '@shopright/shared-types';
 
 export function createApp(): Express {
@@ -34,7 +35,11 @@ export function createApp(): Express {
     })
   );
 
-  // 3. Request parsing
+  // 3a. Raw body for YouPI webhook HMAC verification (MUST be before express.json())
+  app.use('/payments/webhook/youpi', express.raw({ type: 'application/json' }));
+  app.use('/api/v1/payments/webhook/youpi', express.raw({ type: 'application/json' }));
+
+  // 3b. Request parsing
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -74,6 +79,10 @@ export function createApp(): Express {
   // 12. Admin Routes (API Doc §7 — admin role only)
   app.use('/admin', adminRouter);
   app.use('/api/v1/admin', adminRouter);
+
+  // 13. Payment Routes — webhook (raw body, no auth) + initiate (authenticated)
+  app.use('/payments', paymentsRouter);
+  app.use('/api/v1/payments', paymentsRouter);
 
   // 6. 404 handler for unknown routes
   app.use((req: Request, _res: Response, next: NextFunction) => {

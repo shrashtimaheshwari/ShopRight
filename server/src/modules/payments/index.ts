@@ -1,10 +1,12 @@
 import { PaymentMethod, ApiErrorCode } from '@shopright/shared-types';
 import { PaymentProvider } from './types.js';
 import { CodProvider } from './codProvider.js';
+import { YoupiProvider, youpiProvider } from './youpiProvider.js';
 import { AppError } from '../../middleware/errorHandler.js';
 
 export * from './types.js';
 export * from './codProvider.js';
+export * from './youpiProvider.js';
 
 const codProvider = new CodProvider();
 
@@ -16,6 +18,8 @@ export function getPaymentProvider(method: PaymentMethod): PaymentProvider {
   switch (method) {
     case PaymentMethod.COD:
       return codProvider;
+    case PaymentMethod.UPI_QR:
+      return youpiProvider;
     case PaymentMethod.RAZORPAY_TEST:
       throw new AppError(
         501,

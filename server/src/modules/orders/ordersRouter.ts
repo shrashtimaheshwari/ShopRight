@@ -10,6 +10,7 @@ import {
 } from './ordersController.js';
 import { authenticate, requireRole } from '../auth/authMiddleware.js';
 import { asyncHandler } from '../../middleware/asyncHandler.js';
+import { initiatePaymentHandler } from '../payments/paymentsController.js';
 
 export const ordersRouter = Router();
 
@@ -21,3 +22,4 @@ ordersRouter.get('/:id', asyncHandler(getOrderHandler));
 ordersRouter.get('/:id/status', asyncHandler(getOrderStatusHandler));
 ordersRouter.post('/:id/cancel', asyncHandler(cancelCustomerOrderHandler));
 ordersRouter.post('/:id/rating', requireRole(Role.CUSTOMER), asyncHandler(createOrderRatingHandler));
+ordersRouter.post('/:id/pay', requireRole(Role.CUSTOMER), asyncHandler(initiatePaymentHandler));

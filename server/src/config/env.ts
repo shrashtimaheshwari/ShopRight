@@ -5,7 +5,8 @@ dotenv.config();
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.coerce.number().default(4000),
+  PORT: z.coerce.number().default(3001),
+  HOST: z.string().default('0.0.0.0'),
   DATABASE_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/shopright?schema=public'),
   JWT_ACCESS_SECRET: z.string().default('dev_jwt_access_secret_do_not_use_in_prod_12345'),
   JWT_REFRESH_SECRET: z.string().default('dev_jwt_refresh_secret_do_not_use_in_prod_67890'),
@@ -13,6 +14,9 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176'),
   GOOGLE_CLIENT_ID: z.string().default('582096119859-2frlksmhqmtaoris57b8c43br29hembu.apps.googleusercontent.com'),
+  YOUPI_API_URL: z.string().url().default('http://localhost:6100'),
+  YOUPI_API_KEY: z.string().default('dev_youpi_api_key'),
+  YOUPI_WEBHOOK_SECRET: z.string().min(16).default('dev_youpi_webhook_secret_32chars_min'),
 });
 
 const parsed = envSchema.safeParse(process.env);

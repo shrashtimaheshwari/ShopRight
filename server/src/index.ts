@@ -8,6 +8,17 @@ const httpServer = createServer(app);
 // Attach Socket.IO for real-time order status events (Milestone 6)
 initSocketIO(httpServer);
 
+httpServer.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Error: Port ${config.PORT} is already in use by another process.`);
+    console.error(`👉 Run this in PowerShell to free port ${config.PORT}:`);
+    console.error(`   Stop-Process -Name node -Force -ErrorAction SilentlyContinue\n`);
+  } else {
+    console.error('Server error:', err);
+  }
+  process.exit(1);
+});
+
 httpServer.listen(config.PORT, () => {
   console.log(`🚀 ShopRight API server running in ${config.NODE_ENV} mode on port ${config.PORT}`);
   console.log(`📡 Healthcheck available at http://localhost:${config.PORT}/api/v1/health`);

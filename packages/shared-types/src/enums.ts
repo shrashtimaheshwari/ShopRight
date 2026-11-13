@@ -26,6 +26,7 @@ export enum OrderStatus {
 export enum PaymentMethod {
   COD = 'COD',
   RAZORPAY_TEST = 'RAZORPAY_TEST',
+  UPI_QR = 'UPI_QR',
 }
 
 export enum PaymentStatus {

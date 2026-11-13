@@ -62,7 +62,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shopright_test?schema=public
           JWT_ACCESS_SECRET: test_jwt_access_secret_12345
           JWT_REFRESH_SECRET: test_jwt_refresh_secret_67890
-          PORT: 4000
+          PORT: 3001
 
       - name: Build all workspaces
         run: npm run build

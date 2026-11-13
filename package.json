@@ -25,6 +25,7 @@
     "prisma:migrate": "npm run prisma:migrate --workspace=server",
     "prisma:studio": "npm run prisma:studio --workspace=server",
     "seed:data": "npm run seed:data --workspace=server",
+    "clean:ports": "powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 3001,5173,5174,5175,5176 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }\"",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down"
   },
