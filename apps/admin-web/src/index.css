@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* ShopRight role portal visual system */
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#24352c;background:#f6f7f3;font-synthesis:none;text-rendering:optimizeLegibility}body{background:#f6f7f3!important;color:#24352c!important;min-height:100vh}h1,h2,h3,h4,h5,h6{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.025em}.glass-panel{background:#fff!important;backdrop-filter:none!important;border:1px solid #e7ebe4!important;box-shadow:0 5px 18px rgba(27,47,36,.045)}.bg-slate-950{background-color:#f6f7f3!important}.bg-slate-900{background-color:#fff!important}.bg-slate-800{background-color:#eff2eb!important}.text-white{color:#25372e!important}.text-slate-400{color:#718077!important}.text-slate-300{color:#526158!important}.text-slate-500{color:#77857c!important}.border-slate-800,.border-slate-900{border-color:#e6eae2!important}.text-orange-400,.text-orange-300{color:#bd7043!important}.text-blue-400,.text-blue-300{color:#4e7397!important}.text-purple-400,.text-purple-300{color:#78649a!important}header.sticky{background:rgba(255,255,255,.95)!important;border-color:#e5e9e1!important;box-shadow:0 2px 12px rgba(34,55,40,.04)}header.sticky .bg-slate-900.border-slate-800{background:#f3f5f0!important;border-color:#e5e9e1!important}main.max-w-6xl{padding-top:30px;padding-bottom:56px}footer{background:#f6f7f3;border-color:#e6eae2!important;color:#88938b!important}input,select,textarea{background:#fff!important;color:#33453a!important;border-color:#dfe5dc!important}input::placeholder,textarea::placeholder{color:#9aa49c!important}button:disabled{opacity:.58}
