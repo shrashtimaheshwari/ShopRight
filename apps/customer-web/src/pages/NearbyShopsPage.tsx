@@ -6,12 +6,12 @@ import { apiRequest } from '../api/client';
 
 const categories = ['All shops', 'Grocery', 'Bakery', 'Pharmacy', 'Produce'];
 
-// Fix 1: no duplicate URLs — 4 distinct Unsplash images
+// Verified working Unsplash images (Produce, Bakery, Grocery, Pharmacy)
 const art = [
-  'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=85',
-  'https://images.unsplash.com/photo-1608198093002-ad4e005484df?auto=format&fit=crop&w=1000&q=85',
-  'https://images.unsplash.com/photo-1534723452862-4c874986ebad?auto=format&fit=crop&w=1000&q=85',
-  'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85',
+  'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
+  'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80',
+  'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1000&q=80',
+  'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=1000&q=80',
 ];
 
 type SortOrder = 'distance' | 'name';
