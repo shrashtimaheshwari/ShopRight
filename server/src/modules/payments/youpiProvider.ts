@@ -54,7 +54,7 @@ export function verifyYoupiWebhookSignature(rawBody: Buffer, signature: string):
 
 /** Returns true if dev/test mode — avoids real HTTP calls */
 function isDevMode(): boolean {
-  return config.NODE_ENV === 'test' || config.YOUPI_API_KEY === 'dev_youpi_api_key';
+  return config.NODE_ENV === 'test' || (!config.YOUPI_API_URL.includes('railway.app') && config.YOUPI_API_KEY === 'dev_youpi_api_key');
 }
 
 export class YoupiProvider implements PaymentProvider {
@@ -78,6 +78,8 @@ export class YoupiProvider implements PaymentProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-merchant-id': '00000000-0000-0000-0000-000000000001',
+          'x-merchant-key': config.YOUPI_API_KEY,
           'x-api-key': config.YOUPI_API_KEY,
         },
         body: JSON.stringify({
@@ -115,9 +117,9 @@ export class YoupiProvider implements PaymentProvider {
       );
     }
 
-    let data: YoupiCreateSessionResponse;
+    let data: any;
     try {
-      data = (await response.json()) as YoupiCreateSessionResponse;
+      data = await response.json();
     } catch {
       throw new AppError(
         502,
@@ -126,11 +128,15 @@ export class YoupiProvider implements PaymentProvider {
       );
     }
 
+    const providerRef = data.paymentId || data.id || `session-${orderId}`;
+    const checkoutUrl = data.checkoutUrl || `${config.YOUPI_API_URL}/checkout/${providerRef}`;
+    const expiresAt = data.expiresAt ? new Date(data.expiresAt) : new Date(Date.now() + 15 * 60 * 1000);
+
     return {
       status: PaymentStatus.PENDING,
-      providerRef: data.id,
-      checkoutUrl: data.checkoutUrl,
-      expiresAt: new Date(data.expiresAt),
+      providerRef,
+      checkoutUrl,
+      expiresAt,
     };
   }
 
