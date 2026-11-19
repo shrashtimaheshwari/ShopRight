@@ -9,9 +9,12 @@
     "server"
   ],
   "scripts": {
-    "dev": "concurrently -k -p \"[{name}]\" -n \"API,CUSTOMER,MERCHANT,DELIVERY,ADMIN\" -c \"green,cyan,yellow,blue,magenta\" \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\"",
-    "dev:all": "concurrently -k -p \"[{name}]\" -n \"API,CUSTOMER,MERCHANT,DELIVERY,ADMIN\" -c \"green,cyan,yellow,blue,magenta\" \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\"",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"API,CUSTOMER,MERCHANT,DELIVERY,ADMIN,STUDIO\" -c \"green,cyan,yellow,blue,magenta,white\" \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\" \"npm run dev:studio\"",
+    "dev:all": "concurrently -k -p \"[{name}]\" -n \"API,CUSTOMER,MERCHANT,DELIVERY,ADMIN,STUDIO\" -c \"green,cyan,yellow,blue,magenta,white\" \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\" \"npm run dev:studio\"",
     "dev:frontends": "concurrently -k -p \"[{name}]\" -n \"CUSTOMER,MERCHANT,DELIVERY,ADMIN\" -c \"cyan,yellow,blue,magenta\" \"npm run dev:customer\" \"npm run dev:merchant\" \"npm run dev:delivery\" \"npm run dev:admin\"",
+    "dev:studio": "npx --workspace=server prisma studio --port 5555 --browser none",
+    "predev": "npm run build --workspace=packages/shared-types",
+    "start": "npm run dev",
     "build": "npm run build --workspaces --if-present",
     "pretypecheck": "npm run build --workspace=packages/shared-types",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -25,9 +28,9 @@
     "dev:admin": "npm run dev --workspace=apps/admin-web",
     "prisma:generate": "npm run prisma:generate --workspace=server",
     "prisma:migrate": "npm run prisma:migrate --workspace=server",
-    "prisma:studio": "npm run prisma:studio --workspace=server",
+    "prisma:studio": "npx --workspace=server prisma studio --port 5555 --browser none",
     "seed:data": "npm run seed:data --workspace=server",
-    "clean:ports": "powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 3001,5173,5174,5175,5176 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }\"",
+    "clean:ports": "powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 3001,5173,5174,5175,5176,5555 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }\"",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down"
   },
