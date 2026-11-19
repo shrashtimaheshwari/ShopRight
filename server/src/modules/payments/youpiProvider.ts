@@ -86,10 +86,17 @@ export class YoupiProvider implements PaymentProvider {
           amount: (amountPaise / 100).toFixed(2),
           currency: 'INR',
           orderId,
+          returnUrl: `http://localhost:5173/orders/${orderId}/track`,
+          cancelUrl: `http://localhost:5173/orders/${orderId}/track`,
+          customer: {
+            name: 'Customer',
+            email: 'customer@shopright.app',
+            phoneNumber: '9999999999',
+          },
           customerDetails: {
             name: 'Customer',
             email: 'customer@shopright.app',
-            phone: '0000000000',
+            phone: '9999999999',
           },
         }),
       });
