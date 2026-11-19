@@ -342,13 +342,13 @@ export function OrderTrackingPage() {
 
         {order.payment?.method === 'UPI_QR' && order.payment?.status !== 'COMPLETED' && (
           <div className="pt-2 space-y-3">
-            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/30 to-slate-900 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 block">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 block">
                   On-Demand Dynamic UPI QR
                 </span>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Click to launch a live, 15-minute dynamic QR payment session for <b className="text-white">₹{(order.total / 100).toFixed(2)}</b>.
+                <p className="text-xs text-slate-700 mt-0.5">
+                  Click to launch a live, 15-minute dynamic QR payment session for <b className="text-slate-900">₹{(order.total / 100).toFixed(2)}</b>.
                 </p>
               </div>
               <button
