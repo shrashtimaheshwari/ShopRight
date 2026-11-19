@@ -380,21 +380,21 @@ function ActiveAssignmentsView() {
 
                   {/* Locations: Shop & Customer */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5" /> Pickup From (Shop)
+                    <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200/90 space-y-1.5 shadow-xs">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-amber-600" /> Pickup From (Shop)
                       </span>
-                      <p className="text-xs font-bold text-white">{String(shop.name ?? 'Shop')}</p>
-                      <p className="text-xs text-slate-400">{String(shop.address ?? 'Address')}</p>
+                      <p className="text-sm font-bold text-slate-900">{String(shop.name ?? 'Shop')}</p>
+                      <p className="text-xs text-slate-700 leading-relaxed">{String(shop.address ?? 'Address')}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                        <Navigation className="w-3.5 h-3.5" /> Deliver To (Customer)
+                    <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200/90 space-y-1.5 shadow-xs">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                        <Navigation className="w-3.5 h-3.5 text-emerald-600" /> Deliver To (Customer)
                       </span>
-                      <p className="text-xs font-bold text-white">{String(address.label ?? 'Customer Location')}</p>
-                      <p className="text-xs text-slate-400">
-                        {String(address.line1 ?? '')}, {String(address.city ?? '')}
+                      <p className="text-sm font-bold text-slate-900">{String(address.label ?? 'Customer Location')}</p>
+                      <p className="text-xs text-slate-700 leading-relaxed">
+                        {String(address.line1 ?? '')}{address.city ? `, ${String(address.city)}` : ''}
                       </p>
                     </div>
                   </div>
