@@ -94,6 +94,7 @@ export function CheckoutPage() {
           productId: i.product.id,
           quantity: i.quantity,
         })),
+        paymentMethod,
         idempotencyKey: `client_order_${Date.now()}`,
       };
 
@@ -101,18 +102,6 @@ export function CheckoutPage() {
         method: 'POST',
         body: JSON.stringify(payload),
       });
-
-      // If customer chose UPI QR, initiate payment session via YouPI-PG
-      if (paymentMethod === PaymentMethod.UPI_QR) {
-        try {
-          await apiRequest(`/orders/${order.id}/pay`, {
-            method: 'POST',
-            body: JSON.stringify({ method: PaymentMethod.UPI_QR }),
-          });
-        } catch (payErr) {
-          console.warn('Failed to pre-initiate YouPI payment session:', payErr);
-        }
-      }
 
       clearCart();
       navigate(`/orders/${order.id}/track`);

@@ -17,6 +17,7 @@ const createOrderSchema = z
     shopId: z.string().min(1, 'Shop ID is required'),
     deliveryAddressId: z.string().min(1, 'Delivery address ID is required'),
     items: z.array(createOrderItemSchema).min(1, 'At least one item is required'),
+    paymentMethod: z.nativeEnum(PaymentMethod).optional(),
     idempotencyKey: z.string().optional(),
     // Explicitly reject price tampering attempts
     price: z.undefined({ message: 'Client-provided price is forbidden' }),
@@ -47,7 +48,7 @@ export async function createOrderHandler(req: Request, res: Response): Promise<v
     );
   }
 
-  const { shopId, deliveryAddressId, items, idempotencyKey } = parseResult.data;
+  const { shopId, deliveryAddressId, items, paymentMethod, idempotencyKey } = parseResult.data;
 
   // 1. Idempotency check (Security Doc §3)
   if (idempotencyKey) {
@@ -153,7 +154,7 @@ export async function createOrderHandler(req: Request, res: Response): Promise<v
         },
         payment: {
           create: {
-            method: PaymentMethod.COD,
+            method: paymentMethod ?? PaymentMethod.COD,
             status: PaymentStatus.PENDING,
           },
         },

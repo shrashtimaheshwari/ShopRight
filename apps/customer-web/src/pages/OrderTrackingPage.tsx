@@ -84,17 +84,41 @@ export function OrderTrackingPage() {
   async function handleInitiatePayment() {
     if (!orderId) return;
     setIsInitiatingPayment(true);
+    // Open new tab immediately on user gesture to avoid popup blockers
+    const payWindow = window.open('about:blank', '_blank');
+    if (payWindow) {
+      payWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Connecting to Secure UPI...</title></head>
+        <body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#fff;font-family:system-ui,sans-serif;">
+          <div style="width:36px;height:36px;border:3px solid #334155;border-top-color:#10b981;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+          <p style="margin-top:16px;font-size:14px;color:#94a3b8;font-weight:600;">Generating fresh live UPI QR payment session...</p>
+          <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+        </body>
+        </html>
+      `);
+    }
+
     try {
       const res = await apiRequest<{ success: boolean; data: any }>(`/orders/${orderId}/pay`, {
         method: 'POST',
         body: JSON.stringify({ method: 'UPI_QR' }),
       });
       if (res.data?.checkoutUrl) {
-        window.open(res.data.checkoutUrl, '_blank');
+        if (payWindow && !payWindow.closed) {
+          payWindow.location.href = res.data.checkoutUrl;
+        } else {
+          window.location.href = res.data.checkoutUrl;
+        }
         const data = await apiRequest<OrderDto>(`/orders/${orderId}`);
         setOrder(data);
+      } else {
+        if (payWindow && !payWindow.closed) payWindow.close();
+        alert('Could not start payment session. Please try again.');
       }
     } catch (err: any) {
+      if (payWindow && !payWindow.closed) payWindow.close();
       alert(err.message || 'Failed to initiate UPI payment.');
     } finally {
       setIsInitiatingPayment(false);
@@ -316,52 +340,32 @@ export function OrderTrackingPage() {
           )}
         </div>
 
-        {order.payment?.method === 'UPI_QR' && order.payment?.status !== 'COMPLETED' && (() => {
-          const isExpired = Boolean(order.payment?.expiresAt && new Date(order.payment.expiresAt).getTime() < Date.now());
-          return (
-            <div className="pt-2 space-y-2">
-              {isExpired && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>Previous payment window expired. Click below to generate a fresh QR code and complete your payment.</span>
-                </div>
-              )}
-              {order.payment?.checkoutUrl && !order.payment.checkoutUrl.includes('pay.dev.local') && !isExpired ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <a
-                    href={order.payment.checkoutUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20"
-                  >
-                    <QrCode className="w-4 h-4" />
-                    Open UPI QR Checkout Portal
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                  <button
-                    disabled={isInitiatingPayment}
-                    onClick={handleInitiatePayment}
-                    className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 transition-all disabled:opacity-50"
-                    title="Generate a fresh QR code if the previous payment session was cancelled or expired"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isInitiatingPayment ? 'animate-spin' : ''}`} />
-                    {isInitiatingPayment ? 'Generating...' : 'Refresh QR Session'}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  disabled={isInitiatingPayment}
-                  onClick={handleInitiatePayment}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
-                >
-                  <QrCode className="w-4 h-4" />
-                  {isInitiatingPayment ? 'Generating QR...' : (isExpired ? 'Generate Fresh UPI QR' : 'Generate Live UPI QR')}
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </button>
-              )}
+        {order.payment?.method === 'UPI_QR' && order.payment?.status !== 'COMPLETED' && (
+          <div className="pt-2 space-y-3">
+            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/30 to-slate-900 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 block">
+                  On-Demand Dynamic UPI QR
+                </span>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Click to launch a live, 15-minute dynamic QR payment session for <b className="text-white">₹{(order.total / 100).toFixed(2)}</b>.
+                </p>
+              </div>
+              <button
+                disabled={isInitiatingPayment}
+                onClick={handleInitiatePayment}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-lg shadow-emerald-600/25 disabled:opacity-50 shrink-0 cursor-pointer"
+              >
+                <QrCode className="w-4 h-4" />
+                {isInitiatingPayment ? 'Launching Live Session...' : `Pay ₹${(order.total / 100).toFixed(2)} via UPI QR`}
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
             </div>
-          );
-        })()}
+            <p className="text-[11px] text-slate-500 italic">
+              💡 Tip: Every click generates a fresh dynamic QR session directly on Railway with zero stale countdowns.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Cancellation Guard (Security Doc §4) */}
