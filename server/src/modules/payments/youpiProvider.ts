@@ -83,7 +83,7 @@ export class YoupiProvider implements PaymentProvider {
           'x-api-key': config.YOUPI_API_KEY,
         },
         body: JSON.stringify({
-          amount: amountPaise,
+          amount: (amountPaise / 100).toFixed(2),
           currency: 'INR',
           orderId,
           customerDetails: {
