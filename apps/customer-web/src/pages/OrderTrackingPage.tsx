@@ -101,15 +101,16 @@ export function OrderTrackingPage() {
     }
 
     try {
-      const res = await apiRequest<{ success: boolean; data: any }>(`/orders/${orderId}/pay`, {
+      const payment = await apiRequest<any>(`/orders/${orderId}/pay`, {
         method: 'POST',
         body: JSON.stringify({ method: 'UPI_QR' }),
       });
-      if (res.data?.checkoutUrl) {
+      const checkoutUrl = payment?.checkoutUrl || payment?.data?.checkoutUrl;
+      if (checkoutUrl) {
         if (payWindow && !payWindow.closed) {
-          payWindow.location.href = res.data.checkoutUrl;
+          payWindow.location.href = checkoutUrl;
         } else {
-          window.location.href = res.data.checkoutUrl;
+          window.location.href = checkoutUrl;
         }
         const data = await apiRequest<OrderDto>(`/orders/${orderId}`);
         setOrder(data);
