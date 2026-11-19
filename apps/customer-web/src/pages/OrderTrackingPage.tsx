@@ -316,43 +316,52 @@ export function OrderTrackingPage() {
           )}
         </div>
 
-        {order.payment?.method === 'UPI_QR' && order.payment?.status !== 'COMPLETED' && (
-          <div className="pt-2">
-            {order.payment?.checkoutUrl && !order.payment.checkoutUrl.includes('pay.dev.local') ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <a
-                  href={order.payment.checkoutUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20"
-                >
-                  <QrCode className="w-4 h-4" />
-                  Open UPI QR Checkout Portal
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+        {order.payment?.method === 'UPI_QR' && order.payment?.status !== 'COMPLETED' && (() => {
+          const isExpired = Boolean(order.payment?.expiresAt && new Date(order.payment.expiresAt).getTime() < Date.now());
+          return (
+            <div className="pt-2 space-y-2">
+              {isExpired && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>Previous payment window expired. Click below to generate a fresh QR code and complete your payment.</span>
+                </div>
+              )}
+              {order.payment?.checkoutUrl && !order.payment.checkoutUrl.includes('pay.dev.local') && !isExpired ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href={order.payment.checkoutUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20"
+                  >
+                    <QrCode className="w-4 h-4" />
+                    Open UPI QR Checkout Portal
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                  <button
+                    disabled={isInitiatingPayment}
+                    onClick={handleInitiatePayment}
+                    className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 transition-all disabled:opacity-50"
+                    title="Generate a fresh QR code if the previous payment session was cancelled or expired"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isInitiatingPayment ? 'animate-spin' : ''}`} />
+                    {isInitiatingPayment ? 'Generating...' : 'Refresh QR Session'}
+                  </button>
+                </div>
+              ) : (
                 <button
                   disabled={isInitiatingPayment}
                   onClick={handleInitiatePayment}
-                  className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 transition-all disabled:opacity-50"
-                  title="Generate a fresh QR code if the previous payment session was cancelled or expired"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isInitiatingPayment ? 'animate-spin' : ''}`} />
-                  {isInitiatingPayment ? 'Generating...' : 'Refresh QR Session'}
+                  <QrCode className="w-4 h-4" />
+                  {isInitiatingPayment ? 'Generating QR...' : (isExpired ? 'Generate Fresh UPI QR' : 'Generate Live UPI QR')}
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </button>
-              </div>
-            ) : (
-              <button
-                disabled={isInitiatingPayment}
-                onClick={handleInitiatePayment}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
-              >
-                <QrCode className="w-4 h-4" />
-                {isInitiatingPayment ? 'Generating QR...' : 'Generate Live UPI QR'}
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Cancellation Guard (Security Doc §4) */}
